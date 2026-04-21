@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SymptomTracker.Api/SymptomTracker.Api.csproj" />
+    <Project Path="src/SymptomTracker.Application/SymptomTracker.Application.csproj" />
+    <Project Path="src/SymptomTracker.Domain/SymptomTracker.Domain.csproj" />
+    <Project Path="src/SymptomTracker.Infrastructure/SymptomTracker.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SymptomTracker.Tests/SymptomTracker.Tests.csproj" />
+  </Folder>
+</Solution>
