@@ -6,7 +6,7 @@ namespace SymptomTracker.Domain.Entities;
 public sealed class EnvironmentSnapshot
 {
     public Guid Id { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+    public DateTime Timestamp { get; private set; }
     
     /// <summary>
     /// Barometric pressure in hectopascals (hPa) to match SI unit returned by weather APIs
@@ -33,6 +33,8 @@ public sealed class EnvironmentSnapshot
     /// </summary>
     public string? Location { get; private set; }
 
+    private EnvironmentSnapshot() { }
+    
     public static EnvironmentSnapshot Create(
         double pressureHpa,
         double? delta12HrHpa = null,
@@ -40,12 +42,12 @@ public sealed class EnvironmentSnapshot
         double? temperatureFahrenheit = null,
         double? humidityPercent = null,
         string? location = null,
-        DateTime? createdAt = null)
+        DateTime? timestamp = null)
     {
         return new EnvironmentSnapshot
         {
             Id = Guid.NewGuid(),
-            CreatedAt = createdAt?.ToUniversalTime() ?? DateTime.UtcNow,
+            Timestamp = timestamp?.ToUniversalTime() ?? DateTime.UtcNow,
             PressureHpa = pressureHpa,
             Delta12HrHpa = delta12HrHpa,
             Delta24HrHpa = delta24HrHpa,

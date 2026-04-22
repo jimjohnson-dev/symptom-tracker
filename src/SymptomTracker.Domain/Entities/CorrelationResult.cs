@@ -45,7 +45,9 @@ public sealed class CorrelationResult
     /// </summary>
     public double ToleranceHours { get; private set; }
     public string? Notes { get; private set; }
-
+    
+    private CorrelationResult() { }
+    
     public static CorrelationResult Create(
         DateTime windowStart,
         DateTime windowEnd,

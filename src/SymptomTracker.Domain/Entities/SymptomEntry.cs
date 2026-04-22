@@ -8,7 +8,7 @@ namespace SymptomTracker.Domain.Entities;
 public sealed class SymptomEntry
 {
     public Guid Id { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+    public DateTime Timestamp { get; private set; }
     public EntryRole Role { get; private set; }
     
     /// <summary>
@@ -62,9 +62,11 @@ public sealed class SymptomEntry
         }
     }
     
+    private SymptomEntry() { }
+    
     public static SymptomEntry Create(
         EntryRole role, 
-        DateTime? createdAt = null,
+        DateTime? timestamp = null,
         double? headPainLevel = null,
         double? eyePressure = null,
         double? visionClarity = null,
@@ -77,7 +79,7 @@ public sealed class SymptomEntry
         return new SymptomEntry
         {
             Id = Guid.NewGuid(),
-            CreatedAt = createdAt?.ToUniversalTime() ?? DateTime.UtcNow,
+            Timestamp = timestamp?.ToUniversalTime() ?? DateTime.UtcNow,
             Role = role,
             HeadPainLevel = headPainLevel,
             EyePressure = eyePressure,
