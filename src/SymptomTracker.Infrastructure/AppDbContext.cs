@@ -3,13 +3,11 @@ using SymptomTracker.Domain.Entities;
 
 namespace SymptomTracker.Infrastructure;
 
-public class AppDbContext : DbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<CorrelationResult> CorrelationResults => Set<CorrelationResult>();
     public DbSet<EnvironmentSnapshot> EnvironmentSnapshots => Set<EnvironmentSnapshot>();
     public DbSet<SymptomEntry> SymptomEntries => Set<SymptomEntry>();
-
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

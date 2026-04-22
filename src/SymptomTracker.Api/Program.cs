@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using SymptomTracker.Application.Interfaces;
+using SymptomTracker.Application.Services;
+using SymptomTracker.Infrastructure;
+using SymptomTracker.Infrastructure.Providers;
+using SymptomTracker.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,10 +22,19 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // SQLite for small scale, minimal infra data storage
-// TODO: Use DefaultConnection if exists, otherwise create the datasource on first run
-// builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=app.db"));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=symptomtracker.db"));
 
-// Add services to the container.
+// Repositories
+builder.Services.AddScoped<ISymptomEntryRepository, SymptomEntryRepository>();
+builder.Services.AddScoped<IEnvironmentSnapshotRepository, EnvironmentSnapshotRepository>();
+builder.Services.AddScoped<ICorrelationResultRepository, CorrelationResultRepository>();
+
+// Application Services
+builder.Services.AddScoped<ICorrelationService, CorrelationService>();
+
+// Weather Provider (stub)
+builder.Services.AddSingleton<IWeatherDataProvider, StubWeatherDataProvider>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -30,5 +44,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
+
+// Migrations - auto-applying on startup for local-first SQLite. Recommend replacing with a proper CI/CD pipeline in prod envs
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();
