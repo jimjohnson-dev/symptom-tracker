@@ -8,6 +8,5 @@ public enum CorrelationConfidence
     Low,
     Medium,
     High,
-    InsufficientData,
-    Unknown
+    InsufficientData
 }

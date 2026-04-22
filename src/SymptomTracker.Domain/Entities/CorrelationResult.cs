@@ -17,7 +17,7 @@ public sealed class CorrelationResult
     public DateTime ComputedAt { get; private set; }
     public DateTime WindowStart { get; private set; }
     public DateTime WindowEnd { get; private set; }
-    public int SymptomCount { get; private set; }
+    public int SymptomEntryCount { get; private set; }
     public int SnapshotCount { get; private set; }
     
     /// <summary>
@@ -51,13 +51,13 @@ public sealed class CorrelationResult
     public static CorrelationResult Create(
         DateTime windowStart,
         DateTime windowEnd,
-        int symptomCount,
+        int symptomEntryCount,
         int snapshotCount,
         int pairedDataCount,
         double? pressureSeverityCorrelation,
         CorrelationConfidence confidence,
         double toleranceHours,
-        string? notes)
+        string? notes = null)
     {
         return new CorrelationResult
         {
@@ -65,7 +65,7 @@ public sealed class CorrelationResult
             ComputedAt = DateTime.UtcNow,
             WindowStart = windowStart,
             WindowEnd = windowEnd,
-            SymptomCount = symptomCount,
+            SymptomEntryCount = symptomEntryCount,
             SnapshotCount = snapshotCount,
             PairedDataCount = pairedDataCount,
             PressureSeverityCorrelation = pressureSeverityCorrelation,

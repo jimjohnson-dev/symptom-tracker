@@ -27,7 +27,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Role).IsRequired().HasConversion<string>();
             
             // Computed value, not persisted - ignore
-            e.Ignore(x => x.AverageSeverity);
+            e.Ignore(x => x.OverallSeverity);
             
             // Avoid full table scans -> query pattern relies on windowStart and windowEnd times
             e.HasIndex(x => x.Timestamp).HasDatabaseName("IX_SymptomEntries_Timestamp");

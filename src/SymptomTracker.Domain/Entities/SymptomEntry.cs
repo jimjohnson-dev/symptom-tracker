@@ -53,7 +53,7 @@ public sealed class SymptomEntry
     /// <summary>
     /// Average of symptom values for a given entry, null if no values added (notes only)
     /// </summary>
-    public double? AverageSeverity
+    public double? OverallSeverity
     {
         get
         {
