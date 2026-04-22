@@ -40,7 +40,7 @@ public class CreateSymptomEntryRequest
 public class SymptomEntryDto
 {
     public Guid Id { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public DateTime Timestamp { get; set; }
     public EntryRole Role { get; set; }
     public double? HeadPainLevel { get; set; }
     public double? EyePressure { get; set; }
@@ -50,5 +50,5 @@ public class SymptomEntryDto
     public double? Aphasia { get; set; }
     public double? Confusion { get; set; }
     public string? Notes { get; set; }
-    public double? AverageSeverity { get; set; }
+    public double? OverallSeverity { get; set; }
 }

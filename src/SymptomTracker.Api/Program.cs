@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using SymptomTracker.Api.Middleware;
 using SymptomTracker.Application.Interfaces;
 using SymptomTracker.Application.Services;
 using SymptomTracker.Infrastructure;
@@ -8,8 +9,10 @@ using SymptomTracker.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Controllers
 builder.Services.AddControllers();
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -21,7 +24,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// SQLite for small scale, minimal infra data storage
+// Database - SQLite for small scale, minimal infra data storage
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=symptomtracker.db"));
 
 // Repositories
@@ -37,11 +40,12 @@ builder.Services.AddSingleton<IWeatherDataProvider, StubWeatherDataProvider>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+// Middleware
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+// Enable Swagger for all envs, not recommended for actual prod envs
+app.UseSwagger();
+app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Symptom Tracker v1"));
 
 app.UseHttpsRedirection();
 app.MapControllers();
