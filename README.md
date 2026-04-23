@@ -49,9 +49,9 @@ cd src/SymptomTracker.Api
 dotnet run
 ```
 
-The API starts on `http://localhost:5014` by default. The SQLite database file `symptomtracker.db` is created automatically in the working directory on first run.
+The API starts on `http://localhost:5000` by default. The SQLite database file `symptomtracker.db` is created automatically in the working directory on first run.
 
-Open Swagger UI: [http://localhost:5014/swagger](http://localhost:5014/swagger)
+Open Swagger UI: [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
 ### Run Tests
 

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using Swashbuckle.AspNetCore.Swagger;
 using SymptomTracker.Api.Middleware;
 using SymptomTracker.Application.Interfaces;
 using SymptomTracker.Application.Services;
@@ -47,7 +48,7 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Symptom Tracker v1"));
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.MapControllers();
 
 // handle EF Migrations - auto-applying on startup ok for this version, full ci/cd pipeline would be overkill here
