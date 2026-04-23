@@ -38,8 +38,12 @@ public class CorrelationService(
 
         if (pairs.Count >= MinimumPairsRequired)
         {
-            coefficient = ComputePearson(pairs);
-            confidence = ClassifyConfidence(pairs.Count);
+            // If identical values are logged (no variance) both stdev values are 0, resulting in a divide-by-zero scenario (NaN)
+            var raw = ComputePearson(pairs);
+            coefficient = double.IsNaN(raw) || double.IsInfinity(raw) ? null : raw;
+            
+            // If Pearson returns NaN and coefficient is null, default to InsufficientData for confidence
+            confidence = coefficient is null ? CorrelationConfidence.InsufficientData : ClassifyConfidence(pairs.Count);
         }
         else
         {

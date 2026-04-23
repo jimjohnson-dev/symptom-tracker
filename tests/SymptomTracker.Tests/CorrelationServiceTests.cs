@@ -209,8 +209,8 @@ public class CorrelationServiceTests : IDisposable
         for (int i = 0; i < 5; i++)
         {
             var t = now.AddHours(-i);
-            context.SymptomEntries.Add(MakePatientEntry(t, 5.0));
-            context.EnvironmentSnapshots.Add(MakeSnapshot(t, 1010.0));
+            context.SymptomEntries.Add(MakePatientEntry(t, 5.0 + i));
+            context.EnvironmentSnapshots.Add(MakeSnapshot(t, 1013.0 - i));
         }
         await context.SaveChangesAsync();
         var result = await svc.ComputeAsync(now.AddDays(-1), now, toleranceHours: 2.0);
