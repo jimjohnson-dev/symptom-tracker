@@ -21,12 +21,13 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
     {
         ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
         ctx.Response.ContentType = "application/json";
-        
+
         var body = JsonSerializer.Serialize(new
         {
+            // TODO: expand exception response body from ex
             error = "An unexpected error occurred."
         });
-        
+
         await ctx.Response.WriteAsync(body);
     }
 }
