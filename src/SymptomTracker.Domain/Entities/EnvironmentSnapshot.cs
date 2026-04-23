@@ -1,36 +1,18 @@
 namespace SymptomTracker.Domain.Entities;
 
-/// <summary>
-/// Captures time-bound barometric pressure changes 
-/// </summary>
 public sealed class EnvironmentSnapshot
 {
     public Guid Id { get; private set; }
     public DateTime Timestamp { get; private set; }
     
-    /// <summary>
-    /// Barometric pressure in hectopascals (hPa) to match SI unit returned by weather APIs
-    /// Intracranial Pressure (ICP) typically measured in mmMg, conversion handled by DTO layer
-    /// Standard sea-level pressure = 1013.25 hPa, assume sea-level for v1
-    /// </summary>
+    // barometric pressure in hectopascals (hPa) to match SI unit returned by weather APIs
     public double PressureHpa { get; private set; }
-    
-    /// <summary>
-    /// Track pressure change over previous 12 hours. Rapid 12-hr drops >= 5 hPa commonly correlate
-    /// to migraines/IIH symptom increases.
-    /// </summary>
     public double? Delta12HrHpa { get; private set; }
-    
-    /// <summary>
-    /// Track pressure change over previous 24 hours. Normalizes bursty noise over shorter time frames.
-    /// </summary>
     public double? Delta24HrHpa { get; private set; }
     public double? TemperatureFahrenheit { get; private set; }
     public double? HumidityPercent { get; private set; }
     
-    /// <summary>
-    /// Label for current location (City, State) for v1 visuals only. Removes privacy and tracking concerns.
-    /// </summary>
+    // city-state location text
     public string? Location { get; private set; }
 
     private EnvironmentSnapshot() { }

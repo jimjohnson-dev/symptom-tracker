@@ -5,6 +5,7 @@ namespace SymptomTracker.Application.DTOs;
 
 public class CorrelationRequestDto
 {
+    // TODO: use consts instead of hardcoding vals here if range vals change a lot
     // days to include in analysis, 3 months can catch seasonal weather changes
     [Range(1, 90, ErrorMessage = "Value must be between -90 and 90")]
     public int WindowDays { get; set; } = 7;

@@ -2,7 +2,6 @@ using System.Text.Json;
 
 namespace SymptomTracker.Api.Middleware;
 
-// returns structured JSON error response instead of default ASP.NET error page across the app, constrains exception logic to a single place
 public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext ctx)
@@ -25,8 +24,7 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
         
         var body = JsonSerializer.Serialize(new
         {
-            error = "An unexpected error occurred.",
-            details = ex.Message
+            error = "An unexpected error occurred."
         });
         
         await ctx.Response.WriteAsync(body);

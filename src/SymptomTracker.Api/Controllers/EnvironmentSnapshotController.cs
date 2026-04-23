@@ -76,7 +76,7 @@ public class EnvironmentSnapshotController(IEnvironmentSnapshotRepository repo, 
         var end = DateTime.UtcNow;
         var start = end.AddDays(-windowDays);
         var snapshots = await repo.GetByWindowAsync(start, end, ct);
-        return Ok(snapshots.Select(DtoMapper.ToDto));
+        return snapshots.Count == 0 ? NotFound() : Ok(snapshots.Select(DtoMapper.ToDto));
     }
 
     private async Task<double?> ComputeDeltaAsync(double currentPressure, DateTime snapshotTime, int hours, CancellationToken ct = default)

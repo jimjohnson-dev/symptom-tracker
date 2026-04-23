@@ -2,29 +2,17 @@ using SymptomTracker.Domain.Enums;
 
 namespace SymptomTracker.Domain.Entities;
 
-/// <summary>
-/// Persistant snapshot of pressure-to-symptom correlation over a time window. Correlations computed at
-/// write time to avoid rerunning the calculation to retrieve past analyses for trending ops. Also keeps
-/// the data auditable and idempotent. 
-/// </summary>
 public sealed class CorrelationResult
 {
     public Guid Id { get; private set; }
     
-    /// <summary>
-    /// Track time of correlation computation for auditing purposes
-    /// </summary>
     public DateTime ComputedAt { get; private set; }
     public DateTime WindowStart { get; private set; }
     public DateTime WindowEnd { get; private set; }
     public int SymptomEntryCount { get; private set; }
     public int SnapshotCount { get; private set; }
     
-    /// <summary>
-    /// Count of symptom entry/snapshot pairs matched within ToleranceHours, required for Pearson formula.
-    /// Count less than SymptomCount when some entries have no nearby snapshot or were outside the tolerance
-    /// window.
-    /// </summary>
+    // symptom-environmentSnapshot data pairs for correlation calcs
     public int PairedDataCount { get; private set; }
     
     /// <summary>
@@ -38,11 +26,7 @@ public sealed class CorrelationResult
     public double? PressureSeverityCorrelation { get; private set; }
     public CorrelationConfidence Confidence { get; private set; }
     
-    /// <summary>
-    /// Maximum time gap (hours) allowed when pairing a symptom entry with its nearest neighbor snapshot.
-    /// Stored with the result for idempotent ops because changing the tolerance can produce
-    /// different pair counts.
-    /// </summary>
+    // maximum time gap allowed between entries to find nearest neighbor snapshot
     public double ToleranceHours { get; private set; }
     public string? Notes { get; private set; }
     
