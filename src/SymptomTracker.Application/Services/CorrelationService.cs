@@ -17,6 +17,7 @@ public class CorrelationService(
 
     public async Task<CorrelationResult> ComputeCorrelationAsync(DateTime windowStart, DateTime windowEnd, double toleranceHours, CancellationToken ct = default)
     {
+        // TODO: add toleranceHours range validation
         var symptoms = await symptomEntryRepo.GetByWindowAsync(windowStart, windowEnd, ct);
         var snapshots = await environmentSnapshotRepo.GetByWindowAsync(windowStart, windowEnd, ct);
         
@@ -64,6 +65,7 @@ public class CorrelationService(
         List<EnvironmentSnapshot> snapshots,
         TimeSpan toleranceSpan)
     {
+        // TODO: for larger datasets at scale, I'd use a sorted list of snapshots w/a binary search for O(n log n)
         var pairs = new List<(double, double)>();
 
         // O(n^2) time, good enough for small datasets - skipped sorting the data
