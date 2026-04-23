@@ -1,6 +1,7 @@
 # Symptom Tracker API
 
-## Made for patients diagnosed with Ideopathic Intracranial Hypertension (IIH)/PseudoTumor Ceribrii 
+> [!NOTE]
+> Made for patients diagnosed with Ideopathic Intracranial Hypertension (IIH)/PseudoTumor Ceribrii 
 
 A C# .NET 10 WebAPI for tracking and correlating symptoms related to Pseudotumor Cerebri (IIH) with barometric pressure changes over time.
 
