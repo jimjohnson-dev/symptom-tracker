@@ -18,7 +18,7 @@ public class StubWeatherDataProvider : IWeatherDataProvider
 
     private readonly Random _rand = new();
     
-    public Task<WeatherReading> GetCurrentReadingAsync(double lat, double lon, CancellationToken cancellationToken = default)
+    public Task<WeatherReading> GetCurrentReadingAsync(double lat, double lon, CancellationToken ct = default)
     {
         // Simulated mid-latitude weather variance for testing purposes
         var pressure = StandardPressureHpa + (_rand.NextDouble() * PressureVarianceHpa * 2 - PressureVarianceHpa);

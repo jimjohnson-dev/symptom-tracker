@@ -11,10 +11,8 @@ public static class PressureConversion
 
 public class CreateEnvironmentSnapshotRequest
 {
-    /// <summary>
-    /// Lat/Long coordinates for fetching weather data from provider with no persistence.
-    /// Opting to store City-State location instead for privacy concerns.
-    /// </summary>
+    // TODO: worth adding or overkill?
+    // adding Lat/Long coordinates for fetching weather data from actual weather provider, v1 only concerned with city-state text
     [Required]
     [Range(-90, 90, ErrorMessage = "Value must be between -90 and 90")]
     public double Latitude { get; set; }
@@ -22,16 +20,13 @@ public class CreateEnvironmentSnapshotRequest
     [Required]
     [Range(-180, 180, ErrorMessage = "Value must be between -90 and 90")]
     public double Longitude { get; set; }
+    public DateTime? Timestamp { get; set; }
     
-    /// <summary>
-    /// Manual override options for testing to bypass Lat/Long if desired
-    /// </summary>
+    // manual override options if not using Lat/Long
     public double? ManualPressureHpa { get; set; }
     public double? ManualTemperatureFahrenheit { get; set; }
     public double? ManualHumidityPercent { get; set; }
     public string? ManualLocation { get; set; }
-    
-    public DateTime? Timestamp { get; set; }
 }
 
 public class EnvironmentSnapshotDto
@@ -40,9 +35,8 @@ public class EnvironmentSnapshotDto
     public DateTime Timestamp { get; set; }
     public double PressureHpa { get; set; }
     
-    // Include pressure as in/Hg to match typical reporting metrics from US weather apps
+    // most weather apps report barometric pressure as in/Hg, low effort enough to include
     public double PressureInHg => Math.Round(PressureHpa * PressureConversion.HpaToInHg, 4);
-    
     public double? Delta12HrHpa { get; set; }
     public double? Delta24HrHpa { get; set; }
     public double? TemperatureFahrenheit { get; set; }

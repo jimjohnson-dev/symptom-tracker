@@ -4,9 +4,7 @@ using SymptomTracker.Domain.Enums;
 
 namespace SymptomTracker.Api.Mapping;
 
-/// <summary>
-/// API-layer mapping helpers to translate domain entities into API-specific DTOs in place of AutoMapper for this scale. 
-/// </summary>
+// chose explicit mapping for this stage of the project, AutoMapper was overkill
 public static class DtoMapper
 {
     public static SymptomEntryDto ToDto(SymptomEntry e) => new()
@@ -22,7 +20,7 @@ public static class DtoMapper
         Aphasia = e.Aphasia,
         Confusion = e.Confusion,
         Notes = e.Notes,
-        OverallSeverity = e.OverallSeverity
+        OverallSeverity = e.OverallSeverity,
     };
 
     public static EnvironmentSnapshotDto ToDto(EnvironmentSnapshot s) => new()

@@ -3,37 +3,38 @@ using SymptomTracker.Domain.Enums;
 
 namespace SymptomTracker.Application.DTOs;
 
-/// <summary>
-/// Input for creating a new symptom entry - all symptom values are optional to reduce user friction
-/// </summary>
+// symptom entry vals optional for notes-only use case from Caregiver or Patient
 public class CreateSymptomEntryRequest
 {
+    private const string ErrorMsg0To10 = "Value must be between 0 and 10.";
+    private const int MaxNotesLength = 2000;
+    private const int Min = 0, Max = 10;
+    // only concerned with Patient for this version
     public EntryRole Role { get; set; } = EntryRole.Patient;
     
     public DateTime? Timestamp { get; set; }
-    
-    [Range(0, 10, ErrorMessage = "Value must be between 0 and 10.")]
+    [Range(Min, Max, ErrorMessage = ErrorMsg0To10)]
     public double? HeadPainLevel { get; set; }
     
-    [Range(0, 10, ErrorMessage = "Value must be between 0 and 10.")]
+    [Range(Min, Max, ErrorMessage = ErrorMsg0To10)]
     public double? EyePressure { get; set; }
     
-    [Range(0, 10, ErrorMessage = "Value must be between 0 and 10.")]
+    [Range(Min, Max, ErrorMessage = ErrorMsg0To10)]
     public double? VisionClarity { get; set; }
     
-    [Range(0, 10, ErrorMessage = "Value must be between 0 and 10.")]
+    [Range(Min, Max, ErrorMessage = ErrorMsg0To10)]
     public double? Fatigue { get; set; }
     
-    [Range(0, 10, ErrorMessage = "Value must be between 0 and 10.")]
+    [Range(Min, Max, ErrorMessage = ErrorMsg0To10)]
     public double? Nausea { get; set; }
     
-    [Range(0, 10, ErrorMessage = "Value must be between 0 and 10.")]
+    [Range(Min, Max, ErrorMessage = ErrorMsg0To10)]
     public double? Aphasia { get; set; }
 
-    [Range(0, 10, ErrorMessage = "Value must be between 0 and 10.")]
+    [Range(Min, Max, ErrorMessage = ErrorMsg0To10)]
     public double? Confusion { get; set; }
     
-    [MaxLength(2000)]
+    [MaxLength(MaxNotesLength)]
     public string? Notes { get; set; }
 }
 

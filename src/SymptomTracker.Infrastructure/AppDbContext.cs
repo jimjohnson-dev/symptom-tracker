@@ -16,18 +16,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ConfigureCorrelationResult(modelBuilder);
     }
 
-    private static void ConfigureSymptomEntry(ModelBuilder modelBuilder)
+    private static void ConfigureSymptomEntry(ModelBuilder mb)
     {
-        modelBuilder.Entity<SymptomEntry>(e =>
+        mb.Entity<SymptomEntry>(e =>
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Timestamp).IsRequired();
             e.Property(x => x.Role).IsRequired().HasConversion<string>();
             
-            // Computed value, not persisted - ignore
+            // ignore non-persisted computed value
             e.Ignore(x => x.OverallSeverity);
             
-            // Avoid full table scans -> query pattern relies on windowStart and windowEnd times
+            // avoids full table scans -> query pattern relies on windowStart and windowEnd times
             e.HasIndex(x => x.Timestamp).HasDatabaseName("IX_SymptomEntries_Timestamp");
         });
     }
@@ -40,6 +40,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.Timestamp).IsRequired();
             e.Property(x => x.PressureHpa).IsRequired();
 
+            // same query pattern as ConfigureSymptomEntry
             e.HasIndex(x => x.Timestamp).HasDatabaseName("IX_EnvironmentSnapshots_Timestamp");
         });
     }
@@ -52,7 +53,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.ComputedAt).IsRequired();
             e.Property(x => x.Confidence).IsRequired().HasConversion<string>();
             
-            // Use ComputedAt instead of by Id for future filtering on list of recent results
+            // TODO: add composite index with WindowStart for results list endpoint?
             e.HasIndex(x => x.ComputedAt).HasDatabaseName("IX_CorrelationResults_ComputedAt");
         });
     }

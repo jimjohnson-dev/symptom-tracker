@@ -4,13 +4,6 @@ namespace SymptomTracker.Application.Interfaces;
 
 public interface ICorrelationService
 {
-    /// <summary>
-    /// Computes a Pearson correlation between barometric pressure and symptom severity given
-    /// a time window. Returns a persisted result.
-    /// </summary>
-    Task<CorrelationResult> ComputeAsync(
-        DateTime windowStart,
-        DateTime windowEnd,
-        double toleranceHours,
-        CancellationToken cancellationToken = default);
+    // computes the Pearson correlation coefficient between barometric pressure and symptom severity in a given timespan
+    Task<CorrelationResult> ComputeCorrelationAsync(DateTime windowStart, DateTime windowEnd, double toleranceHours, CancellationToken ct = default);
 }

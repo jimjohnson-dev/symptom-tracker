@@ -2,28 +2,26 @@ using System.Text.Json;
 
 namespace SymptomTracker.Api.Middleware;
 
-/// <summary>
-/// Central exception handling that returns structured JSON error response instead of default ASP.NET error page.
-/// </summary>
+// returns structured JSON error response instead of default ASP.NET error page across the app, constrains exception logic to a single place
 public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
 {
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext ctx)
     {
         try
         {
-            await next(context);
+            await next(ctx);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Unhandled exception for {Method} {Path}", context.Request.Method, context.Request.Path);
-            await WriteErrorResponseAsync(context, ex);
+            logger.LogError(ex, "Unhandled exception for {Method} {Path}", ctx.Request.Method, ctx.Request.Path);
+            await WriteErrorResponseAsync(ctx, ex);
         }
     }
 
-    private static async Task WriteErrorResponseAsync(HttpContext context, Exception ex)
+    private static async Task WriteErrorResponseAsync(HttpContext ctx, Exception ex)
     {
-        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        context.Response.ContentType = "application/json";
+        ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        ctx.Response.ContentType = "application/json";
         
         var body = JsonSerializer.Serialize(new
         {
@@ -31,6 +29,6 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
             details = ex.Message
         });
         
-        await context.Response.WriteAsync(body);
+        await ctx.Response.WriteAsync(body);
     }
 }
