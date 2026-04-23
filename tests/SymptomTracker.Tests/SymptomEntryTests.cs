@@ -6,7 +6,7 @@ namespace SymptomTracker.Tests;
 public class SymptomEntryTests
 {
     [Fact]
-    public void OverallSeverity_ReturnsNull_WhenNoValuesAreSet()
+    public void OverallSeverityReturnsNullWhenNoValuesAreSet()
     {
         var entry = SymptomEntry.Create(
             role: EntryRole.Patient,
@@ -16,9 +16,9 @@ public class SymptomEntryTests
     }
 
     [Fact]
-    public void OverallSeverity_AveragesOnlyNonNullValues()
+    public void OverallSeverityAveragesOnlyNonNullValues()
     {
-        // Set 3/5 values. Average must ignore the two null fields.
+        // Set 3/5 values, expect average to ignore other fields
         var entry = SymptomEntry.Create(
             role: EntryRole.Patient,
             headPainLevel: 8.0,
@@ -31,7 +31,7 @@ public class SymptomEntryTests
     }
 
     [Fact]
-    public void Create_SetsTimestamp_ToUtcNow_WhenNotProvided()
+    public void CreateDefaultsToUtcNowTimestamp()
     {
         var before = DateTime.UtcNow;
         var entry = SymptomEntry.Create(role: EntryRole.Patient);
@@ -42,7 +42,7 @@ public class SymptomEntryTests
     }
 
     [Fact]
-    public void Create_UsesProvidedTimestamp_ConvertedToUtc()
+    public void CreateConvertsProvidedTimestampToUtc()
     {
         var localTime = new DateTime(2025, 3, 14, 15, 09, 0, DateTimeKind.Local);
         var entry = SymptomEntry.Create(role: EntryRole.Patient, timestamp: localTime);

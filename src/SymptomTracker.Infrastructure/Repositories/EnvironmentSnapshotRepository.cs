@@ -4,26 +4,26 @@ using SymptomTracker.Domain.Entities;
 
 namespace SymptomTracker.Infrastructure.Repositories;
 
-public class EnvironmentSnapshotRepository(AppDbContext context) : IEnvironmentSnapshotRepository
+public class EnvironmentSnapshotRepository(AppDbContext ctx) : IEnvironmentSnapshotRepository
 {
-    public Task<EnvironmentSnapshot?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => context.EnvironmentSnapshots.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+    public Task<EnvironmentSnapshot?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => ctx.EnvironmentSnapshots.FirstOrDefaultAsync(r => r.Id == id, ct);
 
-    public Task<List<EnvironmentSnapshot>> GetByWindowAsync(DateTime start, DateTime end, CancellationToken cancellationToken = default)
-        => context.EnvironmentSnapshots
+    public Task<List<EnvironmentSnapshot>> GetByWindowAsync(DateTime start, DateTime end, CancellationToken ct = default)
+        => ctx.EnvironmentSnapshots
             .Where(s => s.Timestamp >= start && s.Timestamp <= end)
             .OrderBy(s => s.Timestamp)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(ct);
 
-    public Task<EnvironmentSnapshot?> GetMostRecentBeforeAsync(DateTime timestamp, CancellationToken cancellationToken = default)
-        => context.EnvironmentSnapshots
+    public Task<EnvironmentSnapshot?> GetMostRecentBeforeTimestampAsync(DateTime timestamp, CancellationToken ct = default)
+        => ctx.EnvironmentSnapshots
             .Where(s => s.Timestamp < timestamp)
             .OrderByDescending(s => s.Timestamp)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(ct);
 
-    public async Task AddAsync(EnvironmentSnapshot snapshot, CancellationToken cancellationToken = default)
-        => await context.EnvironmentSnapshots.AddAsync(snapshot, cancellationToken);
+    public async Task AddAsync(EnvironmentSnapshot snapshot, CancellationToken ct = default)
+        => await ctx.EnvironmentSnapshots.AddAsync(snapshot, ct);
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
-        => context.SaveChangesAsync(cancellationToken);
+    public Task SaveChangesAsync(CancellationToken ct = default)
+        => ctx.SaveChangesAsync(ct);
 }

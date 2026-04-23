@@ -5,77 +5,69 @@ using MathNet.Numerics.Statistics;
 
 namespace SymptomTracker.Application.Services;
 
-/// <summary>
-/// Computes Pearson correlation between atmospheric pressure and IIH symptom severity using nearest-neighbor within a tolerance window.
-/// </summary>
+// computes Pearson correlation between atmospheric pressure and IIH symptom severity using nearest-neighbor within a tolerance window.
 public class CorrelationService(
-    ISymptomEntryRepository symptomEntryRepository,
-    IEnvironmentSnapshotRepository environmentSnapshotRepository,
-    ICorrelationResultRepository correlationResultRepository)
+    ISymptomEntryRepository symptomEntryRepo,
+    IEnvironmentSnapshotRepository environmentSnapshotRepo,
+    ICorrelationResultRepository correlationResultRepo)
     : ICorrelationService
 {
-    // Less than 5 pairs makes Pearson statistically insignificant. Do not report any coefficient below this threshold
+    // Pearson needs at least 5 pairs to be statistically meaningful, otherwise confidence in outcome is low (not enough data diversity)
     private const int MinimumPairsRequired = 5;
 
-    public async Task<CorrelationResult> ComputeAsync(
-        DateTime windowStart, 
-        DateTime windowEnd, 
-        double toleranceHours,
-        CancellationToken cancellationToken = default)
+    public async Task<CorrelationResult> ComputeCorrelationAsync(DateTime windowStart, DateTime windowEnd, double toleranceHours, CancellationToken ct = default)
     {
-        // Get symptoms and snapshots for given time window
-        var symptoms = await symptomEntryRepository.GetByWindowAsync(windowStart, windowEnd, cancellationToken);
-        var snapshots = await environmentSnapshotRepository.GetByWindowAsync(windowStart, windowEnd, cancellationToken);
+        var symptoms = await symptomEntryRepo.GetByWindowAsync(windowStart, windowEnd, ct);
+        var snapshots = await environmentSnapshotRepo.GetByWindowAsync(windowStart, windowEnd, ct);
         
-        // Exclude EntryRole.Caregiver - correlations only care about perceived symptoms from the patient
-        var patientSymptoms = symptoms.Where(s => s is { Role: EntryRole.Patient, OverallSeverity: not null }).ToList();
+        // exclude Caregiver entries - correlations only care about perceived symptoms from the patient
+        var patientSymptoms = symptoms.Where(s => s.Role is EntryRole.Patient && s.OverallSeverity is not null).ToList();
 
+        // tried shorter tolerances but the returned pairs didn't capture the spikes I was looking for
         var toleranceSpan = TimeSpan.FromHours(toleranceHours);
-        var pairs = BuildPairs(patientSymptoms, snapshots, toleranceSpan);
+        var dataPairs = BuildPairs(patientSymptoms, snapshots, toleranceSpan);
 
         double? coefficient = null;
         CorrelationConfidence confidence;
 
-        if (pairs.Count >= MinimumPairsRequired)
+        if (dataPairs.Count >= MinimumPairsRequired)
         {
-            // If identical values are logged (no variance) both stdev values are 0, resulting in a divide-by-zero scenario (NaN)
-            var raw = ComputePearson(pairs);
+            // if identical values are logged (no variance) both stdev values are 0, resulting in a divide-by-zero scenario (NaN)
+            var raw = ComputePearson(dataPairs);
             coefficient = double.IsNaN(raw) || double.IsInfinity(raw) ? null : raw;
             
-            // If Pearson returns NaN and coefficient is null, default to InsufficientData for confidence
-            confidence = coefficient is null ? CorrelationConfidence.InsufficientData : ClassifyConfidence(pairs.Count);
+            // if Pearson returns NaN and coefficient is null, default to InsufficientData for confidence
+            confidence = coefficient is null ? CorrelationConfidence.InsufficientData : ClassifyConfidence(dataPairs.Count);
         }
         else
-        {
             confidence = CorrelationConfidence.InsufficientData;
-        }
 
         var result = CorrelationResult.Create(
             windowStart: windowStart,
             windowEnd: windowEnd,
             symptomEntryCount: symptoms.Count,
             snapshotCount: snapshots.Count,
-            pairedDataCount: pairs.Count,
+            pairedDataCount: dataPairs.Count,
             pressureSeverityCorrelation: coefficient,
             confidence: confidence,
             toleranceHours: toleranceHours);
         
-        await correlationResultRepository.AddAsync(result, cancellationToken);
-        await correlationResultRepository.SaveChangesAsync(cancellationToken);
+        await correlationResultRepo.AddAsync(result, ct);
+        await correlationResultRepo.SaveChangesAsync(ct);
         
         return result;
     }
 
-    /// <summary>
-    /// Find the snapshot with the smallest time distance for each patient symptom entry, excluding entries where the distance exceeds the toleranceSpan.
-    /// </summary>
+    // find the snapshot with the smallest time distance for each symptom entry within given toleranceSpan
     private static List<(double Pressure, double Severity)> BuildPairs(
         List<SymptomEntry> symptoms,
         List<EnvironmentSnapshot> snapshots,
         TimeSpan toleranceSpan)
     {
+        // TODO: better way to structure the data here? different type?
         var pairs = new List<(double, double)>();
 
+        // O(n^2) time, good enough for small datasets - skipped sorting the data
         foreach (var symptom in symptoms)
         {
             if (!symptom.OverallSeverity.HasValue) continue;
@@ -83,12 +75,12 @@ public class CorrelationService(
             EnvironmentSnapshot? nearest = null;
             var minGap = TimeSpan.MaxValue;
 
-            foreach (var pair in snapshots)
+            foreach (var snapshot in snapshots)
             {
-                var gap = (symptom.Timestamp - pair.Timestamp).Duration();
+                var gap = (symptom.Timestamp - snapshot.Timestamp).Duration();
                 if (gap >= minGap) continue;
                 minGap = gap;
-                nearest = pair;
+                nearest = snapshot;
             }
             
             if (nearest is not null && minGap <= toleranceSpan)
@@ -98,22 +90,20 @@ public class CorrelationService(
         return pairs;
     }
 
-    /// <summary>
-    /// Pearson correlation coefficient computation given pressure readings and severity values
-    /// source: https://www.statology.org/pearson-correlation-coefficient/
-    /// </summary>
-    private static double ComputePearson(List<(double Pressure, double Severity)> pairs)
+    // find Pearson correlation coefficient computation between pressure readings and severity values
+    // source: https://www.statology.org/pearson-correlation-coefficient/
+    private static double ComputePearson(List<(double Pressure, double Severity)> dataPairs)
     {
-        var seriesPressure = pairs.Select(p => p.Pressure).Where(p => !double.IsNaN(p)).ToArray();
-        var seriesSeverity = pairs.Select(p => p.Severity).Where(p => !double.IsNaN(p)).ToArray();
+        // MathNet.Numerics enumerates both lists under the hood - offloading the overhead here instead
+        var seriesPressure = dataPairs.Select(p => p.Pressure).ToArray();
+        var seriesSeverity = dataPairs.Select(p => p.Severity).ToArray();
         
-        // Use MathNet.Numerics instead of reinventing the solution
-        var correlation = Correlation.Pearson(seriesPressure, seriesSeverity);
-        return correlation;
+        // used MathNet.Numerics instead of reinventing and breaking the calculation
+        return Correlation.Pearson(seriesPressure, seriesSeverity);
     }
 
-    private static CorrelationConfidence ClassifyConfidence(int pairCount) 
-        => pairCount switch
+    private static CorrelationConfidence ClassifyConfidence(int dataPairCount) 
+        => dataPairCount switch
     {
         < MinimumPairsRequired => CorrelationConfidence.InsufficientData,
         < 10 => CorrelationConfidence.Low,

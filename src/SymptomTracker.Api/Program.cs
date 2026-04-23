@@ -9,10 +9,10 @@ using SymptomTracker.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers
+// add Controllers
 builder.Services.AddControllers();
 
-// Swagger
+// add Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -24,33 +24,33 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Database - SQLite for small scale, minimal infra data storage
+// add Database - SQLite fine for this project, switching to a different db should be trivial with this
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=symptomtracker.db"));
 
-// Repositories
-builder.Services.AddScoped<ISymptomEntryRepository, SymptomEntryRepository>();
-builder.Services.AddScoped<IEnvironmentSnapshotRepository, EnvironmentSnapshotRepository>();
+// add Repositories
 builder.Services.AddScoped<ICorrelationResultRepository, CorrelationResultRepository>();
+builder.Services.AddScoped<IEnvironmentSnapshotRepository, EnvironmentSnapshotRepository>();
+builder.Services.AddScoped<ISymptomEntryRepository, SymptomEntryRepository>();
 
-// Application Services
+// add Services
 builder.Services.AddScoped<ICorrelationService, CorrelationService>();
 
-// Weather Provider (stub)
+// add Weather Provider (stub)
 builder.Services.AddSingleton<IWeatherDataProvider, StubWeatherDataProvider>();
 
 var app = builder.Build();
 
-// Middleware
+// add Middleware - slightly overkill for this app but low-cost to start with this
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-// Enable Swagger for all envs, not recommended for actual prod envs
+// add Swagger for all envs, not recommended for actual prod envs
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Symptom Tracker v1"));
 
 app.UseHttpsRedirection();
 app.MapControllers();
 
-// Migrations - auto-applying on startup for local-first SQLite. Recommend replacing with a proper CI/CD pipeline in prod envs
+// handle EF Migrations - auto-applying on startup ok for this version, full ci/cd pipeline would be overkill here
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

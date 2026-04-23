@@ -4,9 +4,7 @@ using SymptomTracker.Infrastructure;
 
 namespace SymptomTracker.Tests;
 
-/// <summary>
-/// Creates an in-memory SQLite database for each test class
-/// </summary>
+// use real data over mocks to catch ordering and boundary conditions
 public sealed class TestDbFactory : IDisposable
 {
     private readonly SqliteConnection _connection;
@@ -20,9 +18,9 @@ public sealed class TestDbFactory : IDisposable
     public AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_connection).Options;
-        var context = new AppDbContext(options);
-        context.Database.EnsureCreated();
-        return context;
+        var ctx = new AppDbContext(options);
+        ctx.Database.EnsureCreated();
+        return ctx;
     }
     
     public void Dispose() => _connection.Dispose();
