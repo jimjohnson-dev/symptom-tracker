@@ -100,8 +100,8 @@ public class CorrelationService(
     /// </summary>
     private static double ComputePearson(List<(double Pressure, double Severity)> pairs)
     {
-        var seriesPressure = pairs.Select(p => p.Pressure);
-        var seriesSeverity = pairs.Select(p => p.Severity);
+        var seriesPressure = pairs.Select(p => p.Pressure).Where(p => !double.IsNaN(p)).ToArray();
+        var seriesSeverity = pairs.Select(p => p.Severity).Where(p => !double.IsNaN(p)).ToArray();
         
         // Use MathNet.Numerics instead of reinventing the solution
         var correlation = Correlation.Pearson(seriesPressure, seriesSeverity);

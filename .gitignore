@@ -481,3 +481,6 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 /src/SymptomTracker.Infrastructure/Migrations/
+/src/SymptomTracker.Api/symptomtracker.db
+/src/SymptomTracker.Api/symptomtracker.db-shm
+/src/SymptomTracker.Api/symptomtracker.db-wal
