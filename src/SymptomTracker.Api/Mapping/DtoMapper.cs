@@ -44,7 +44,7 @@ public static class DtoMapper
         SymptomEntryCount = r.SymptomEntryCount,
         SnapshotCount = r.SnapshotCount,
         PairedDataCount = r.PairedDataCount,
-        PressureSeverityCorrelation = r.PressureSeverityCorrelation,
+        PressureSeverityCorrelations = r.PressureSeverityCorrelations,
         Confidence = r.Confidence,
         ToleranceHours = r.ToleranceHours,
         Notes = r.Notes,

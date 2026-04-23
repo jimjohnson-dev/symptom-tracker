@@ -23,7 +23,7 @@ public sealed class CorrelationResult
     ///     +1 = perfect positive correlation, higher pressure = higher severity (possible VP shunt failure, infection, etc)
     /// Null when PairedDataCount below minimum threshold (5)
     /// </summary>
-    public double? PressureSeverityCorrelation { get; private set; }
+    public double? PressureSeverityCorrelations { get; private set; }
     public CorrelationConfidence Confidence { get; private set; }
     
     // maximum time gap allowed between entries to find nearest neighbor snapshot
@@ -52,7 +52,7 @@ public sealed class CorrelationResult
             SymptomEntryCount = symptomEntryCount,
             SnapshotCount = snapshotCount,
             PairedDataCount = pairedDataCount,
-            PressureSeverityCorrelation = pressureSeverityCorrelation,
+            PressureSeverityCorrelations = pressureSeverityCorrelation,
             Confidence = confidence,
             ToleranceHours = toleranceHours,
             Notes = notes

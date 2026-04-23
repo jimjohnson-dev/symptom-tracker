@@ -24,7 +24,7 @@ public class CorrelationResultDto
     public int SymptomEntryCount { get; set; }
     public int SnapshotCount { get; set; }
     public int PairedDataCount { get; set; }
-    public double? PressureSeverityCorrelation { get; set; }
+    public double? PressureSeverityCorrelations { get; set; }
     public CorrelationConfidence Confidence { get; set; }
     public double ToleranceHours { get; set; }
     public string? Notes { get; set; }
@@ -35,10 +35,10 @@ public class CorrelationResultDto
 
     private string BuildInterpretation()
     {
-        if (Confidence == CorrelationConfidence.InsufficientData || PressureSeverityCorrelation is null)
+        if (Confidence == CorrelationConfidence.InsufficientData || PressureSeverityCorrelations is null)
             return "Not enough data to determine pattern yet.";
 
-        return PressureSeverityCorrelation switch
+        return PressureSeverityCorrelations switch
         {
             // lower pressure expected to correlate with higher severity (common in IIH patients)
             < -0.5 => "Symptoms tend to worsen when pressure drops.",

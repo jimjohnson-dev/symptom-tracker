@@ -15,7 +15,7 @@ public class CorrelationService(
     // Pearson needs at least 5 pairs to be statistically meaningful, otherwise confidence in outcome is low (not enough data diversity)
     private const int MinimumPairsRequired = 5;
 
-    public async Task<CorrelationResult> ComputeCorrelationAsync(DateTime windowStart, DateTime windowEnd, double toleranceHours, CancellationToken ct = default)
+    public async Task<List<CorrelationResult>> ComputeCorrelationAsync(DateTime windowStart, DateTime windowEnd, double toleranceHours, CancellationToken ct = default)
     {
         // TODO: add toleranceHours range validation
         var symptoms = await symptomEntryRepo.GetByWindowAsync(windowStart, windowEnd, ct);
@@ -23,40 +23,71 @@ public class CorrelationService(
         
         // exclude Caregiver entries - correlations only care about perceived symptoms from the patient
         var patientSymptoms = symptoms.Where(s => s.Role is EntryRole.Patient && s.OverallSeverity is not null).ToList();
+        var caregiverSymptoms = symptoms.Where(s => s.Role is EntryRole.Caregiver &&  s.OverallSeverity is not null).ToList();
 
         // tried shorter tolerances but the returned pairs didn't capture the spikes I was looking for
         var toleranceSpan = TimeSpan.FromHours(toleranceHours);
-        var dataPairs = BuildPairs(patientSymptoms, snapshots, toleranceSpan);
+        var patientDataPairs = BuildPairs(patientSymptoms, snapshots, toleranceSpan);
+        var caregiverDataPairs = BuildPairs(caregiverSymptoms, snapshots, toleranceSpan);
 
-        double? coefficient = null;
-        CorrelationConfidence confidence;
+        double? patientCoefficient = null, caregiverCoefficient = null;
+        CorrelationConfidence patientConfidence, caregiverConfidence;
 
-        if (dataPairs.Count >= MinimumPairsRequired)
+        if (patientDataPairs.Count >= MinimumPairsRequired)
         {
             // if identical values are logged (no variance) both stdev values are 0, resulting in a divide-by-zero scenario (NaN)
-            var raw = ComputePearson(dataPairs);
-            coefficient = double.IsNaN(raw) || double.IsInfinity(raw) ? null : raw;
+            var raw = ComputePearson(patientDataPairs);
+            patientCoefficient = double.IsNaN(raw) || double.IsInfinity(raw) ? null : raw;
             
             // if Pearson returns NaN and coefficient is null, default to InsufficientData for confidence
-            confidence = coefficient is null ? CorrelationConfidence.InsufficientData : ClassifyConfidence(dataPairs.Count);
+            patientConfidence = patientCoefficient is null ? CorrelationConfidence.InsufficientData : ClassifyConfidence(patientDataPairs.Count);
         }
         else
-            confidence = CorrelationConfidence.InsufficientData;
+            patientConfidence = CorrelationConfidence.InsufficientData;
 
-        var result = CorrelationResult.Create(
+        if (caregiverDataPairs.Count >= MinimumPairsRequired)
+        {
+            // if identical values are logged (no variance) both stdev values are 0, resulting in a divide-by-zero scenario (NaN)
+            var raw = ComputePearson(caregiverDataPairs);
+            caregiverCoefficient = double.IsNaN(raw) || double.IsInfinity(raw) ? null : raw;
+            
+            // if Pearson returns NaN and coefficient is null, default to InsufficientData for confidence
+            caregiverConfidence = caregiverCoefficient is null ? CorrelationConfidence.InsufficientData : ClassifyConfidence(caregiverDataPairs.Count);
+        }
+        else
+            caregiverConfidence = CorrelationConfidence.InsufficientData;
+
+        List<CorrelationResult> results = new();
+        var patientResult = CorrelationResult.Create(
             windowStart: windowStart,
             windowEnd: windowEnd,
             symptomEntryCount: symptoms.Count,
             snapshotCount: snapshots.Count,
-            pairedDataCount: dataPairs.Count,
-            pressureSeverityCorrelation: coefficient,
-            confidence: confidence,
+            pairedDataCount: patientDataPairs.Count,
+            pressureSeverityCorrelation: patientCoefficient,
+            confidence: patientConfidence,
             toleranceHours: toleranceHours);
         
-        await correlationResultRepo.AddAsync(result, ct);
+        await correlationResultRepo.AddAsync(patientResult, ct);
         await correlationResultRepo.SaveChangesAsync(ct);
         
-        return result;
+        var caregiverResult = CorrelationResult.Create(
+            windowStart: windowStart,
+            windowEnd: windowEnd,
+            symptomEntryCount: symptoms.Count,
+            snapshotCount: snapshots.Count,
+            pairedDataCount: patientDataPairs.Count,
+            pressureSeverityCorrelation: caregiverCoefficient,
+            confidence: caregiverConfidence,
+            toleranceHours: toleranceHours);
+        
+        await correlationResultRepo.AddAsync(caregiverResult, ct);
+        await correlationResultRepo.SaveChangesAsync(ct);
+        
+        results.Add(patientResult);
+        results.Add(caregiverResult);
+        
+        return results;
     }
 
     // find the snapshot with the smallest time distance for each symptom entry within given toleranceSpan

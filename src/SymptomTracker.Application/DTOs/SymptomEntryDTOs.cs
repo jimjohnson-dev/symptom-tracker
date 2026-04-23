@@ -10,7 +10,7 @@ public class CreateSymptomEntryRequest
     private const int MaxNotesLength = 2000;
     private const int Min = 0, Max = 10;
     // only concerned with Patient for this version
-    public EntryRole Role { get; set; } = EntryRole.Patient;
+    public EntryRole Role { get; set; } = EntryRole.Patient; // remove constraint
     
     public DateTime? Timestamp { get; set; }
     [Range(Min, Max, ErrorMessage = ErrorMsg0To10)]
