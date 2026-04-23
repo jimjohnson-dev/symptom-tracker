@@ -1,4 +1,6 @@
-# SymptomTracker
+# Symptom Tracker API
+
+## Made for patients diagnosed with Ideopathic Intracranial Hypertension (IIH)/PseudoTumor Ceribrii 
 
 A C# .NET 10 WebAPI for tracking and correlating symptoms related to Pseudotumor Cerebri (IIH) with barometric pressure changes over time.
 
@@ -6,7 +8,7 @@ A C# .NET 10 WebAPI for tracking and correlating symptoms related to Pseudotumor
 
 Pseudotumor Cerebri causes increased intracranial pressure, causing chronic headaches, visual deficits, impaired or foggy cognition, and increased optic nerve pressure. Many patients report sensitivity to atmospheric pressure changes based on anecdotal evidence. Without tracked data, proving increases in symptoms are related to weather pattern changes is difficult.
 
-In response, this project provides a mechanism for IIH patients and their caregivers to record and analyze data trends.
+In response, this project lets IIH patients and their caregivers record and analyze related data trends.
 
 ## Features
 
@@ -20,8 +22,46 @@ In response, this project provides a mechanism for IIH patients and their caregi
 
 > Work in progress, built as a learning project
 
-## Future Milestones
-1. Stubbed static weather data -> Real weather API integration
-2. Caregiver input capture
-3. Auth
-4. Notifications on significant pressure changes, scheduled logging reminders, etc
+---
+
+## Planned but Not Built
+
+- **Real weather API integration** — connect to Open-Meteo (free, no key) or OpenWeatherMap
+- **Authentication** — JWT or API key gating for a hosted deployment
+- **Caregiver sync mode** — Phase 2: a caregiver logs observations separately; entries are merged with role attribution for display but filtered from severity calculations
+- **Push notifications** — alert patient when a significant pressure drop is detected
+- **Time-series charts** — visualize pressure vs. severity overlay over time
+- **Export** — CSV or PDF report for sharing with a neurologist
+
+
+---
+
+## Running Locally
+
+### Prerequisites
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+### Start the API
+
+```bash
+cd src/SymptomTracker.Api
+dotnet run
+```
+
+The API starts on `http://localhost:5014` by default. The SQLite database file `symptomtracker.db` is created automatically in the working directory on first run.
+
+Open Swagger UI: [http://localhost:5014/swagger](http://localhost:5014/swagger)
+
+### Run Tests
+
+```bash
+dotnet test
+```
+
+Or for verbose output:
+
+```bash
+dotnet test -v normal
+```
+
+---
