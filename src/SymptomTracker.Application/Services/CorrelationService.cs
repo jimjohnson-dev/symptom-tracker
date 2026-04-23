@@ -64,7 +64,6 @@ public class CorrelationService(
         List<EnvironmentSnapshot> snapshots,
         TimeSpan toleranceSpan)
     {
-        // TODO: better way to structure the data here? different type?
         var pairs = new List<(double, double)>();
 
         // O(n^2) time, good enough for small datasets - skipped sorting the data
